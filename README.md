@@ -70,6 +70,9 @@ Cursor Chat 选择文件，输入提示: "按顺序提取所有的 dns 到代码
 # 下载本仓库
 git clone https://github.com/xxnuo/dns-benchmark.git
 cd dns-benchmark
+curl https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb -o ./res/Country.mmdb
+curl https://cdn.jsdelivr.net/gh/Tantalor93/dnspyre@master/data/1000-domains -o ./res/1000-domains
+
 chmod +x bench.sh
 unset HTTPS_PROXY HTTP_PROXY ALL_PROXY
 unset https_proxy http_proxy all_proxy

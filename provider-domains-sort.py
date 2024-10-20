@@ -14,7 +14,7 @@ with open(sys.argv[1], "r") as result_file:
     results = json.load(result_file)
 
 # 初始化 GeoIP 数据库
-reader = geoip2.database.Reader("./data/GeoLite2-Country.mmdb")
+reader = geoip2.database.Reader("./Country.mmdb")
 
 # 遍历所有 provider
 for provider, data in results.items():

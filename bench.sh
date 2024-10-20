@@ -20,7 +20,7 @@ fi
 echo "成功读取 ${#SERVERS[@]} 个 DNS 服务器地址"
 
 # 域名列表路径，以@开头表示相对路径，或者是网址
-DOMAINS="@dnspyre/data/1000-domains"
+DOMAINS="@1000-domains"
 
 # 持续时间
 DURATION="10s"
