@@ -32,8 +32,9 @@ type jsonResult struct {
 	// 这个 json 的字段首字母大小写是 dnspyre 3.4.0 及之前的版本中写错的，目前作者还未更新，暂时保持一致
 	TotalIDmismatch int64 `json:"TotalIDmismatch"`
 	// add:地理信息
-	IPAddress string `json:"ip"`
-	Geocode   string `json:"geocode"`
+	IPAddress string  `json:"ip"`
+	Geocode   string  `json:"geocode"`
+	Score     float64 `json:"score"`
 }
 
 // 自定义 BenchmarkResult 类型，用于 JSON 序列化

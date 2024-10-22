@@ -95,8 +95,12 @@ func runDnspyre(geoDB *geoip2.Reader, preferIPv4 bool, noAAAA bool, binPath, ser
 	result.Geocode = geoCode
 	result.IPAddress = ip
 
+	// 打分
+	result.Score = ScoreBenchmarkResult(result)
+
 	log.WithFields(log.Fields{
 		"目标": server,
+		"得分": fmt.Sprintf("%.2f", result.Score),
 	}).Infof("\x1b[32m%s 测试完成\x1b[0m", server)
 	return result
 }

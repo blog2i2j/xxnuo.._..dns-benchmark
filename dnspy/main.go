@@ -185,6 +185,8 @@ func main() {
 	log.Info("测试完成")
 	// log.Info("测试结果: ", RetData)
 
+	// 评分
+
 	// 将测试结果转换为 JSON 字符串
 	retDataString, err := RetData.String()
 	if err != nil {
@@ -239,4 +241,6 @@ func main() {
 	log.WithFields(log.Fields{
 		"输出文件": OutputPath,
 	}).Info("\x1b[32m测试结果已输出到文件\x1b[0m")
+
+	//
 }

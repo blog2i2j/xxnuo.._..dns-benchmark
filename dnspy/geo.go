@@ -96,7 +96,7 @@ func CheckGeo(geoDB *geoip2.Reader, _server string, preferIPv4 bool) (string, st
 		}
 	}
 	if ip.IsPrivate() || ip.IsUnspecified() {
-		return ip.String(), "PRIVATE", fmt.Errorf("IP地址为私有地址")
+		return ip.String(), "PRIVATE", nil
 	}
 	geoCode, err := checkIPGeo(geoDB, ip)
 	return ip.String(), geoCode, err
