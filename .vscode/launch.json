@@ -5,12 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "启动当前文件",
+      "name": "启动示例调试",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${fileDirname}",
       "args": ["-s", "180.131.144.144", "-s", "114.114.114.114"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "旧版输出 HTML",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${fileDirname}",
+      "args": ["--old-html", "./dnspy_result_2024-10-22-13-56-22.json"],
       "console": "integratedTerminal"
     }
   ]

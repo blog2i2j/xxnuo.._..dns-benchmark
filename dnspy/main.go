@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"math/rand"
@@ -166,6 +169,16 @@ func main() {
 		// 多线程测试,使用 Cfg.Workers 控制一次最多开启的线程数
 		var wg sync.WaitGroup
 		semaphore := make(chan struct{}, Cfg.Workers)
+		ctx, cancel := context.WithCancel(context.Background())
+
+		// 设置中断信号处理
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-c
+			log.Info("收到中断信号，正在取消剩余任务...")
+			cancel()
+		}()
 
 		for _, server := range Servers {
 			wg.Add(1)
@@ -173,18 +186,22 @@ func main() {
 			go func(srv string) {
 				defer wg.Done()
 				defer func() { <-semaphore }()
-				output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, srv, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
-				RetData[srv] = output
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, srv, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
+					RetData[srv] = output
+				}
 			}(server)
 		}
 
 		wg.Wait()
+		cancel() // 确保所有goroutine都已退出
 	}
 
 	log.Info("测试完成")
 	// log.Info("测试结果: ", RetData)
-
-	// 评分
 
 	// 将测试结果转换为 JSON 字符串
 	retDataString, err := RetData.String()
@@ -194,39 +211,8 @@ func main() {
 		}).Fatal("\x1b[31m无法将测试结果转换为 JSON 字符串\x1b[0m")
 	}
 
-	// 输出 HTML 文件
 	if Cfg.OldIsToHTML {
-		htmlFilePath := OutputPath[:len(OutputPath)-5] + ".html"
-		htmlFile, err := os.Create(htmlFilePath)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"错误": err,
-			}).Fatal("\x1b[31m无法创建 HTML 文件\x1b[0m")
-		}
-		defer htmlFile.Close()
-		htmlTemplateData, _ := GetTemplateHTML()
-		htmlTemplate := strings.Replace(string(htmlTemplateData), TemplateHTMLPlaceholder, retDataString, 1)
-
-		_, err = OutputFile.WriteString(htmlTemplate)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"错误":   err,
-				"输出文件": OutputPath,
-			}).Fatal("\x1b[31m无法写入输出文件\x1b[0m")
-		}
-		log.WithFields(log.Fields{
-			"输出文件": OutputPath,
-		}).Info("\x1b[32m测试结果已输出到文件\x1b[0m")
-
-		log.Info("是否使用默认浏览器打开 HTML 输出的文件[Y/n]")
-		var input string
-		fmt.Scanln(&input)
-		if input == "Y" || input == "y" || input == "" {
-			err := open.Run(OutputPath)
-			if err != nil {
-				log.WithError(err).Error("无法打开输出文件")
-			}
-		}
+		OutputHTML(OutputPath, retDataString)
 	}
 
 	// 输出 JSON 文件
@@ -242,4 +228,38 @@ func main() {
 	}).Info("\x1b[32m测试结果已输出到文件\x1b[0m")
 
 	// 是否打开网页分析数据
+}
+
+func OutputHTML(path string, resultString string) {
+	htmlFilePath := path[:len(path)-5] + ".html"
+	htmlFile, err := os.Create(htmlFilePath)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"错误": err,
+		}).Fatal("\x1b[31m无法创建 HTML 文件\x1b[0m")
+	}
+	defer htmlFile.Close()
+	htmlTemplateData, _ := GetTemplateHTML()
+	htmlTemplate := strings.Replace(string(htmlTemplateData), TemplateHTMLPlaceholder, resultString, 1)
+
+	_, err = htmlFile.WriteString(htmlTemplate)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"错误":   err,
+			"输出文件": path,
+		}).Fatal("\x1b[31m无法写入输出文件\x1b[0m")
+	}
+	log.WithFields(log.Fields{
+		"输出文件": path,
+	}).Info("\x1b[32m测试结果已输出到文件\x1b[0m")
+
+	log.Info("是否使用默认浏览器打开 HTML 输出的文件[Y/n]")
+	var input string
+	fmt.Scanln(&input)
+	if input == "Y" || input == "y" || input == "" {
+		err := open.Run(htmlFilePath)
+		if err != nil {
+			log.WithError(err).Error("无法打开输出文件")
+		}
+	}
 }

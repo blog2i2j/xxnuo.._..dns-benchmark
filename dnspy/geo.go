@@ -17,6 +17,9 @@ func checkIPGeo(geoDB *geoip2.Reader, ip net.IP) (string, error) {
 	if err != nil {
 		return "CDN", err
 	}
+	if record.Country.IsoCode == "" {
+		return "CDN", nil
+	}
 	return record.Country.IsoCode, nil
 }
 

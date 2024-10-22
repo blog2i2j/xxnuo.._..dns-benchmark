@@ -153,9 +153,7 @@
         <h2>更新信息</h2>
         <ul>
           <li>一键自行测试程序即将完成发布，可视化批量分析</li>
-          <li>
-            查看最新进度：<a href="https://github.com/xxnuo/dns-benchmark/" target="_blank">GitHub 仓库</a>
-          </li>
+          <li>查看最新进度：<a href="https://github.com/xxnuo/dns-benchmark/" target="_blank">GitHub 仓库</a></li>
         </ul>
       </div>
       <div class="button-container">
@@ -271,12 +269,12 @@
           serverData = serverData.filter((item) => {
             const geocode = item.geocode || "";
             switch (geoFilter) {
-              case "CN+HK+TW":
-                return geocode === "CN" || geocode === "HK" || geocode === "TW";
+              case "CN+HK+TW+CDN":
+                return geocode === "CN" || geocode === "HK" || geocode === "TW" || geocode === "CDN";
               case "JP+KR+SG+US":
                 return geocode === "JP" || geocode === "KR" || geocode === "SG" || geocode === "US";
-              case "其他(包括具有全球 CDN 的服务商)":
-                return !["CN", "HK", "TW", "JP", "KR", "SG", "US"].includes(geocode);
+              case "其他(不包括具有全球 CDN 的服务商)":
+                return !["CN", "HK", "TW", "CDN", "JP", "KR", "SG", "US"].includes(geocode);
               default:
                 return true;
             }
@@ -343,7 +341,7 @@
         });
       }
 
-      const geoFilters = ["CN+HK+TW", "JP+KR+SG+US", "其他(包括具有全球 CDN 的服务商)"];
+      const geoFilters = ["CN+HK+TW+CDN", "JP+KR+SG+US", "其他(不包括具有全球 CDN 的服务商)"];
 
       function renderCharts() {
         createContainers();

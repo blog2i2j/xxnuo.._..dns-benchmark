@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
@@ -21,6 +23,9 @@ type Config struct {
 	Workers         int      // 同一时间测试多少个 DNS 服务器
 	OutputPath      string   // 输出结果的文件路径,必须是相对当前程序工作路径的文件路径
 	OldIsToHTML     bool     // 是否使用旧版方式输出数据到单个 HTML 文件可双击打开查看
+	// 功能参数
+	InputResultJsonPath string // 输入结果 json 文件路径,必须是相对当前程序工作路径的文件路径
+	FnGeo               string // 使用 GeoIP 数据库进行 IP 归属地查询
 }
 
 func InitFlags() (Config, error) {
@@ -37,6 +42,7 @@ func InitFlags() (Config, error) {
 	flag.BoolVar(&cfg.NoAAAARecord, "no-aaaa", false, "\x1b[32m每个测试不解析 AAAA 记录\x1b[0m\n")
 	flag.StringVarP(&cfg.OutputPath, "output", "o", "", "\x1b[32m输出结果的文件路径\n必须是相对当前程序工作路径的文件路径\n不指定则输出到当前工作路径下的 dnspy_result_<当前时间>.json\x1b[0m\n")
 	flag.BoolVar(&cfg.OldIsToHTML, "old-html", false, "\x1b[32m已弃用不建议使用\n建议改用如 <示例1> 程序先直接解析输出数据 json 文件并按提示直接查看可视化数据分析\n如下次需要查看可视化数据分析可如 <示例3> 用程序打开 json 文件\n本参数使用旧版方式输出单个 HTML 文件到数据 json 同目录\n可双击打开查看\x1b[0m\n")
+	flag.StringVarP(&cfg.FnGeo, "geo", "g", "", "\x1b[32m独立功能: 使用 GeoIP 数据库进行 IP 或域名归属地查询\x1b[0m\n")
 	// 使用说明
 	flag.Usage = func() {
 		fmt.Print("使用示例:\n\n" +
@@ -53,10 +59,50 @@ func InitFlags() (Config, error) {
 	flag.Parse()
 
 	otherFlags := flag.Args()
-	if len(otherFlags) > 0 {
+	exitTrigger := false
+
+	if cfg.FnGeo != "" {
+		exitTrigger = true
+		geoDB, err := InitGeoDB()
+		if err != nil {
+			log.WithFields(log.Fields{
+				"错误": err,
+			}).Error("读取 GeoIP 数据库失败")
+			return cfg, err
+		}
+		ip, country, err := CheckGeo(geoDB, cfg.FnGeo, cfg.PreferIPv4)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"错误": err,
+			}).Error("查询失败")
+			return cfg, err
+		}
 		log.WithFields(log.Fields{
-			"其他参数": otherFlags,
-		}).Warnf("\x1b[33m其他参数未被识别\x1b[0m")
+			"IP":   ip,
+			"Code": country,
+		}).Infof("\x1b[32m查询结果:\x1b[0m")
+	}
+
+	for _, v := range otherFlags {
+		if strings.HasSuffix(v, ".json") {
+			cfg.InputResultJsonPath = v
+			if cfg.OldIsToHTML {
+				jsonData, err := os.ReadFile(cfg.InputResultJsonPath)
+				if err != nil {
+					log.WithFields(log.Fields{
+						"错误":   err,
+						"输入文件": cfg.InputResultJsonPath,
+					}).Error("读取输入的 json 文件失败")
+					return cfg, err
+				}
+				OutputHTML(cfg.InputResultJsonPath, string(jsonData))
+				exitTrigger = true
+			}
+		}
+	}
+
+	if exitTrigger {
+		os.Exit(0)
 	}
 
 	if cfg.ServersDataPath == "" && len(cfg.Servers) == 0 {

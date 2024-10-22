@@ -11,5 +11,5 @@ dnspy/res/dnspyre-linux-arm64
 dnspy/res/dnspyre-windows-amd64.exe
 dnspy/res/dnspyre-windows-arm64.exe
 dnspy/res/Country.mmdb
-dnspy/dnspy_result_*.json
+dnspy/dnspy_result_*
 dnspy/dnspy
