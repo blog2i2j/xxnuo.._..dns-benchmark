@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/oschwald/geoip2-golang"
@@ -87,16 +88,22 @@ func CheckGeo(geoDB *geoip2.Reader, _server string, preferIPv4 bool) (string, st
 			}
 		}
 	} else {
-		// IP
-		colonCount := strings.Count(server, ":")
-		if colonCount == 1 && strings.Contains(server, ".") {
-			// IPv4 带端口
-			server = strings.SplitN(server, ":", 2)[0]
+		// IP 或如 localhost 一样的主机名
+		parts := strings.SplitN(server, ":", 2)
+		if len(parts) > 1 {
+			what := parts[1]
+			whatInt, err := strconv.Atoi(what)
+			if err == nil && whatInt > 0 && whatInt < 65536 {
+				// 端口
+				server = parts[0]
+			}
 		}
-		ip = net.ParseIP(server)
-		if ip == nil {
-			ip = net.IPv4zero
+
+		ips, err := net.LookupIP(server)
+		if err != nil || len(ips) == 0 {
+			return "0.0.0.0", "PRIVATE", fmt.Errorf("本地解析器无法解析主机IP地址")
 		}
+		ip = ips[0]
 	}
 	if ip.IsPrivate() || ip.IsUnspecified() {
 		return ip.String(), "PRIVATE", nil

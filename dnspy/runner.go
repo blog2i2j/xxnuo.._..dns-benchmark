@@ -98,13 +98,20 @@ func runDnspyre(geoDB *geoip2.Reader, preferIPv4 bool, noAAAA bool, binPath, ser
 	// 打分
 	result.Score = ScoreBenchmarkResult(result)
 
-	log.WithFields(log.Fields{
-		"目标":    server,
-		"总分":    fmt.Sprintf("%.2f", result.Score.Total),
-		"成功率得分": fmt.Sprintf("%.2f", result.Score.SuccessRate),
-		"错误率得分": fmt.Sprintf("%.2f", result.Score.ErrorRate),
-		"延迟得分":  fmt.Sprintf("%.2f", result.Score.Latency),
-		"QPS得分": fmt.Sprintf("%.2f", result.Score.Qps),
-	}).Infof("\x1b[32m%s 测试完成\x1b[0m", server)
+	if result.Score.Total == 0 {
+		log.WithFields(log.Fields{
+			"目标": server,
+			"错误": "无法连接服务器",
+		}).Errorf("\x1b[31m%s 测试失败\x1b[0m", server)
+	} else {
+		log.WithFields(log.Fields{
+			"目标":    server,
+			"总分":    fmt.Sprintf("%.2f", result.Score.Total),
+			"成功率得分": fmt.Sprintf("%.2f", result.Score.SuccessRate),
+			"错误率得分": fmt.Sprintf("%.2f", result.Score.ErrorRate),
+			"延迟得分":  fmt.Sprintf("%.2f", result.Score.Latency),
+			"QPS得分": fmt.Sprintf("%.2f", result.Score.Qps),
+		}).Infof("\x1b[32m%s 测试完成\x1b[0m", server)
+	}
 	return result
 }
