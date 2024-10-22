@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -155,12 +154,13 @@ func main() {
 
 	// 生成0到1之间的随机小数，保留两位小数
 	randomGenerator := rand.New(rand.NewSource(nowTime.UnixNano()))
-	randomNum := math.Round(randomGenerator.Float64()*100) / 100
+	randomNum := Round(randomGenerator.Float64(), 2)
 
 	// 单线程测试
 	if Cfg.Workers == 1 {
 		for _, server := range Servers {
 			output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, server, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
+			output.Score = ScoreBenchmarkResult(output)
 			RetData[server] = output
 		}
 	} else {

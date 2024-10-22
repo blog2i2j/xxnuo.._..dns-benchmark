@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 )
@@ -35,4 +36,10 @@ func FormatListData(data *[]byte) ([]string, error) {
 	}
 
 	return lines, nil
+}
+
+// Round 四舍五入
+func Round(x float64, precision int) float64 {
+	scale := math.Pow10(precision)
+	return math.Round(x*scale) / scale
 }
