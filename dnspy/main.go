@@ -1,14 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"math/rand"
@@ -154,6 +151,7 @@ func main() {
 
 	// 初始化测试结果
 	RetData = make(map[string]jsonResult, serverCount)
+	var mu sync.Mutex // 添加互斥锁
 
 	// 生成0到1之间的随机小数，保留两位小数
 	randomGenerator := rand.New(rand.NewSource(nowTime.UnixNano()))
@@ -169,16 +167,6 @@ func main() {
 		// 多线程测试,使用 Cfg.Workers 控制一次最多开启的线程数
 		var wg sync.WaitGroup
 		semaphore := make(chan struct{}, Cfg.Workers)
-		ctx, cancel := context.WithCancel(context.Background())
-
-		// 设置中断信号处理
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			<-c
-			log.Info("收到中断信号，正在取消剩余任务...")
-			cancel()
-		}()
 
 		for _, server := range Servers {
 			wg.Add(1)
@@ -186,18 +174,14 @@ func main() {
 			go func(srv string) {
 				defer wg.Done()
 				defer func() { <-semaphore }()
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, srv, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
-					RetData[srv] = output
-				}
+				output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, srv, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
+				mu.Lock() // 加锁
+				RetData[srv] = output
+				mu.Unlock() // 解锁
 			}(server)
 		}
 
 		wg.Wait()
-		cancel() // 确保所有goroutine都已退出
 	}
 
 	log.Info("测试完成")

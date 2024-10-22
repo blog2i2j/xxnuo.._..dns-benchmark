@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "启动示例调试",
+      "name": "Go 示例调试",
       "type": "go",
       "request": "launch",
       "mode": "auto",
@@ -14,7 +14,7 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "旧版输出 HTML",
+      "name": "Go 旧版输出 HTML",
       "type": "go",
       "request": "launch",
       "mode": "auto",

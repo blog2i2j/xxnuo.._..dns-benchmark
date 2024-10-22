@@ -31,7 +31,7 @@ update-domains:
 update-caller:
 	@echo "正在更新 dnspyre 可执行文件..."
 	@echo "请勿修改使用的 dnspyre 版本号,否则会导致 dnspy 无法正常运行"
-	go get github.com/tantalor93/dnspyre/v3@v3.4.0
+	go get github.com/tantalor93/dnspyre/v3@v3.4.1
 	GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o ./res/dnspyre-darwin-amd64 github.com/tantalor93/dnspyre/v3
 	GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o ./res/dnspyre-darwin-arm64 github.com/tantalor93/dnspyre/v3
 	GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o ./res/dnspyre-linux-amd64 github.com/tantalor93/dnspyre/v3

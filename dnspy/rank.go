@@ -14,10 +14,10 @@ type scoreResult struct {
 
 // 权重常量：用于不同评分项的权重
 const (
-	SuccessRateScoreWeight = 30
+	SuccessRateScoreWeight = 35
 	ErrorRateScoreWeight   = 10
-	LatencyScoreWeight     = 40
-	QpsScoreWeight         = 20
+	LatencyScoreWeight     = 50
+	QpsScoreWeight         = 5
 )
 
 // 分数计算的常量阈值

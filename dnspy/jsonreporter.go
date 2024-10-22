@@ -23,14 +23,14 @@ type jsonResult struct {
 	TotalNegativeResponses   int64            `json:"totalNegativeResponses"`
 	TotalErrorResponses      int64            `json:"totalErrorResponses"`
 	TotalIOErrors            int64            `json:"totalIOErrors"`
+	TotalIDmismatch          int64            `json:"totalIDmismatch"` // dnspyre v3.4.1
 	TotalTruncatedResponses  int64            `json:"totalTruncatedResponses"`
 	ResponseRcodes           map[string]int64 `json:"responseRcodes,omitempty"`
 	QuestionTypes            map[string]int64 `json:"questionTypes"`
 	QueriesPerSecond         float64          `json:"queriesPerSecond"`
 	BenchmarkDurationSeconds float64          `json:"benchmarkDurationSeconds"`
 	LatencyStats             latencyStats     `json:"latencyStats"`
-	// 这个 json 的字段首字母大小写是 dnspyre 3.4.0 及之前的版本中写错的，目前作者还未更新，暂时保持一致
-	TotalIDmismatch int64 `json:"TotalIDmismatch"`
+
 	// add:地理信息
 	IPAddress string      `json:"ip"`
 	Geocode   string      `json:"geocode"`
