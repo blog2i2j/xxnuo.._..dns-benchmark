@@ -15,6 +15,9 @@ func runDnspyre(geoDB *geoip2.Reader, preferIPv4 bool, noAAAA bool, binPath, ser
 
 	log.WithFields(log.Fields{
 		"目标": server,
+		"时间": fmt.Sprintf("%ds", duration),
+		"并发": concurrency,
+		"概率": fmt.Sprintf("%.2f", probability),
 	}).Infof("\x1b[32m%s 开始测试\x1b[0m", server)
 	// 先获取服务器地理信息
 	ip, geoCode, err := CheckGeo(geoDB, server, preferIPv4)

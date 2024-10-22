@@ -39,7 +39,7 @@ type jsonResult struct {
 // 自定义 BenchmarkResult 类型，用于 JSON 序列化
 type BenchmarkResult map[string]jsonResult
 
-func (b *BenchmarkResult) ToHTMLObjectString() (string, error) {
+func (b *BenchmarkResult) String() (string, error) {
 	jsonData, err := json.Marshal(b)
 	if err != nil {
 		return "", err

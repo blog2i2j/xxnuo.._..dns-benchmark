@@ -20,23 +20,44 @@ type Config struct {
 	Servers         []string // 手动指定要测试的服务器,支持多个
 	Workers         int      // 同一时间测试多少个 DNS 服务器
 	OutputPath      string   // 输出结果的文件路径,必须是相对当前程序工作路径的文件路径
+	OldIsToHTML     bool     // 是否使用旧版方式输出数据到单个 HTML 文件可双击打开查看
 }
 
 func InitFlags() (Config, error) {
 	cfg := Config{}
-	flag.BoolVar(&cfg.LogJSON, "json", false, "以json格式输出日志")
-	flag.StringVarP(&cfg.LogLevel, "level", "l", "info", "日志级别,可选 debug,info,warn,error,fatal,panic")
-	flag.BoolVar(&cfg.PreferIPv4, "prefer-ipv4", true, "在DNS服务器的域名转换为IP地址过程中优先使用IPv4地址")
-	flag.StringVarP(&cfg.ServersDataPath, "file", "f", "", "要批量测试的服务器数据存储的文件路径,必须是相对当前程序工作路径的文件路径,文件内部格式是一行一条")
-	flag.StringSliceVarP(&cfg.Servers, "server", "s", []string{}, "手动指定要测试的服务器,支持多个")
-	flag.StringVarP(&cfg.DomainsDataPath, "domains", "d", "@sampleDomains@", "要批量测试的域名数据存储的文件路径,必须是相对当前程序工作路径的文件路径,文件内部格式是一行一条,不修改则使用内置的10000个热门域名")
-	flag.IntVarP(&cfg.Duration, "duration", "t", 10, "每个测试持续时间,单位秒")
-	flag.IntVarP(&cfg.Concurrency, "concurrency", "c", 10, "每个测试并发数")
-	flag.IntVarP(&cfg.Workers, "worker", "w", 20, "同一时间测试多少个 DNS 服务器")
-	flag.BoolVar(&cfg.NoAAAARecord, "no-aaaa", false, "每个测试不解析 AAAA 记录")
-	flag.StringVarP(&cfg.OutputPath, "output", "o", "", "输出结果的文件路径,必须是相对当前程序工作路径的文件路径,不指定则输出到当前工作路径下的 dnspy_benchmark_<当前时间>.html")
+	flag.BoolVar(&cfg.LogJSON, "json", false, "\x1b[32m以json格式输出日志\x1b[0m\n")
+	flag.StringVarP(&cfg.LogLevel, "level", "l", "info", "\x1b[32m日志级别\n可选 debug,info,warn,error,fatal,panic\x1b[0m\n")
+	flag.BoolVar(&cfg.PreferIPv4, "prefer-ipv4", true, "\x1b[32m在DNS服务器的域名转换为IP地址过程中优先使用IPv4地址\x1b[0m\n")
+	flag.StringVarP(&cfg.ServersDataPath, "file", "f", "", "\x1b[32m要批量测试的服务器数据存储的文件路径\n必须是相对当前程序工作路径的文件路径\n文件内部格式是一行一条\x1b[0m\n")
+	flag.StringSliceVarP(&cfg.Servers, "server", "s", []string{}, "\x1b[32m手动指定要测试的服务器,支持多个\x1b[0m\n")
+	flag.StringVarP(&cfg.DomainsDataPath, "domains", "d", "@sampleDomains@", "\x1b[32m要批量测试的域名数据存储的文件路径\n必须是相对当前程序工作路径的文件路径\n文件内部格式是一行一条\n不修改则使用内置的10000个热门域名\x1b[0m\n")
+	flag.IntVarP(&cfg.Duration, "duration", "t", 10, "\x1b[32m每个测试持续时间,单位秒\x1b[0m\n")
+	flag.IntVarP(&cfg.Concurrency, "concurrency", "c", 10, "\x1b[32m每个测试并发数\x1b[0m\n")
+	flag.IntVarP(&cfg.Workers, "worker", "w", 20, "\x1b[32m同一时间测试多少个 DNS 服务器\x1b[0m\n")
+	flag.BoolVar(&cfg.NoAAAARecord, "no-aaaa", false, "\x1b[32m每个测试不解析 AAAA 记录\x1b[0m\n")
+	flag.StringVarP(&cfg.OutputPath, "output", "o", "", "\x1b[32m输出结果的文件路径\n必须是相对当前程序工作路径的文件路径\n不指定则输出到当前工作路径下的 dnspy_result_<当前时间>.json\x1b[0m\n")
+	flag.BoolVar(&cfg.OldIsToHTML, "old-html", false, "\x1b[32m已弃用不建议使用\n建议改用如 <示例1> 程序先直接解析输出数据 json 文件并按提示直接查看可视化数据分析\n如下次需要查看可视化数据分析可如 <示例3> 用程序打开 json 文件\n本参数使用旧版方式输出单个 HTML 文件到数据 json 同目录\n可双击打开查看\x1b[0m\n")
+	// 使用说明
+	flag.Usage = func() {
+		fmt.Print("使用示例:\n\n" +
+			"\x1b[33mdnspy\x1b[0m\n\n" +
+			"\x1b[32m使用内置的世界所有域名直接启动测试\x1b[0m\n\n" +
+			"\x1b[33mdnspy -s 114.114.114.114\x1b[0m\n\n" +
+			"\x1b[32m测试单个服务器\x1b[0m\n\n" +
+			"\x1b[33mdnspy dnspy_benchmark_2024-10-22-08-18.json\x1b[0m\n\n" +
+			"\x1b[32m对测试结果进行可视化分析\x1b[0m\n\n" +
+			"参数说明:\n")
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
+
+	otherFlags := flag.Args()
+	if len(otherFlags) > 0 {
+		log.WithFields(log.Fields{
+			"其他参数": otherFlags,
+		}).Warnf("\x1b[33m其他参数未被识别\x1b[0m")
+	}
 
 	if cfg.ServersDataPath == "" && len(cfg.Servers) == 0 {
 		log.Error("你没有指定要测试的服务器数据存储的文件路径或手动输入要测试的服务器")
