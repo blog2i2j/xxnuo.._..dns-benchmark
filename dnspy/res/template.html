@@ -124,11 +124,40 @@
       .button-container button.active {
         background-color: #357a38; /* 激活状态的深绿色 */
       }
+      .update-info {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .update-info h2 {
+        margin-top: 0;
+        color: #333;
+      }
+
+      .update-info ul {
+        margin-bottom: 0;
+      }
+
+      .update-info li {
+        margin-bottom: 5px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>DNS 服务器 Benchmark</h1>
+      <div class="update-info">
+        <h2>更新信息</h2>
+        <ul>
+          <li>一键自行测试程序即将完成发布，可视化批量分析</li>
+          <li>
+            查看最新进度：<a href="https://github.com/xxnuo/dns-benchmark/" target="_blank">GitHub 仓库</a>
+          </li>
+        </ul>
+      </div>
       <div class="button-container">
         <button id="encryptedBtn">仅加密协议(默认)</button>
         <button id="unencryptedBtn">所有协议</button>
@@ -147,7 +176,7 @@
         {
           id: "totalScoreChart",
           label: "总分(越大越好)",
-          dataKey: "scores.total_score",
+          dataKey: "score.total",
           yAxisLabel: "总分",
           sortOrder: "desc",
         },

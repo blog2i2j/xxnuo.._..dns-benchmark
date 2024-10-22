@@ -160,7 +160,6 @@ func main() {
 	if Cfg.Workers == 1 {
 		for _, server := range Servers {
 			output := runDnspyre(GeoDB, Cfg.PreferIPv4, Cfg.NoAAAARecord, DnspyreBinPath, server, DomainsBinPath, Cfg.Duration, Cfg.Concurrency, randomNum)
-			output.Score = ScoreBenchmarkResult(output)
 			RetData[server] = output
 		}
 	} else {
