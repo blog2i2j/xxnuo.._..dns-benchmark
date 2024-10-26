@@ -27,6 +27,8 @@
 
 ## 自测工具 dnspy
 
+> 工具目前还未完成，还在开发中。
+
 在 Github 仓库 [dns-benchmark/releases](https://github.com/xxnuo/dns-benchmark/releases) 中，
 按你的系统架构下载 `dnspy-*` 文件，比如我的 PC 是 Intel 处理器的 macOS，所以下载 `dnspy-darwin-amd64` 文件。
 重命名文件为 `dnspy`（Windows 是 `dnspy.exe`），然后打开终端，进入到你这个文件所在的目录。
@@ -43,7 +45,7 @@ TODO:编写说明
 得到 `results.html` 文件，会自动用浏览器打开。
 Done!
 
-## 如果你想自己编译 dnspy
+## 如果你想自己编译 dnspy 使用旧版输出试试
 
 编译所需环境：
 
@@ -59,8 +61,8 @@ cd dns-benchmark/dnspy
 # 更新所需数据（需要科学上网）
 make update
 make
+./dnspy --old-html
 ```
+按提示可以生成旧版输出 HTML 结果。
 
-即可在当前目录下得到名为 `dnspy` 的可执行文件。
-
-TODO:编写数据展示页面
+目前正在编写新版数据展示页面，完成后会发布。
