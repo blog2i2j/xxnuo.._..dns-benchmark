@@ -4,5 +4,6 @@
   "tip_language": "切换语言",
   "tip_theme": "切换主题",
   "upload_test_data": "读取分析",
+  "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json",
   "tip_upload_test_data": "上传 dnspy 的测试结果文件，在网站上进行分析"
 }

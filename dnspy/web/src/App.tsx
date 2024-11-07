@@ -1,11 +1,16 @@
 import "./App.css";
-import { NavBar } from "./components/NavBar";
+import Analyze from "./components/Analyze";
+import NavBar from "./components/NavBar";
+import { FileProvider } from "./contexts/FileContext";
+
 const App = () => {
   return (
-    <main>
-      <NavBar />
-      <div>content</div>
-    </main>
+    <div id="app">
+      <FileProvider>
+        <NavBar />
+        <Analyze />
+      </FileProvider>
+    </div>
   );
 };
 
