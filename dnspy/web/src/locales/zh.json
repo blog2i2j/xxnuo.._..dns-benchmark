@@ -1,9 +1,31 @@
 {
   "title": "DNSPY 数据可视化面板",
-  "tip_github": "项目地址",
-  "tip_language": "切换语言",
-  "tip_theme": "切换主题",
-  "upload_test_data": "读取分析",
-  "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json",
-  "tip_upload_test_data": "上传 dnspy 的测试结果文件，在网站上进行分析"
+  "tip": {
+    "github": "项目地址",
+    "language": "切换语言",
+    "theme": "切换主题",
+    "upload": "上传 dnspy 的测试结果文件，在网站上进行分析",
+    "clear": "清除当前数据",
+    "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json",
+    "search_region": "搜索地区",
+    "region_filter": "地区筛选",
+    "copied": "服务器已复制到剪贴板",
+    "data_loaded": "数据已加载",
+    "data_loaded_desc": "点击具体项目可以复制服务器地址",
+    "data_load_failed": "数据加载失败",
+    "data_load_failed_desc": "请检查文件格式是否正确"
+
+  },
+  "button": {
+    "upload": "读取分析",
+    "clear": "清除数据",
+    "select_all": "全选",
+    "clear_all": "清除"
+  },
+  "score": {
+    "scores": "总分",
+    "latencies": "平均延迟",
+    "successRates": "成功率",
+    "qps": "QPS"
+  }
 }

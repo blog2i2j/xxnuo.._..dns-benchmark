@@ -1,9 +1,30 @@
 {
   "title": "DNSPY Dashboard",
-  "tip_github": "Project Repository",
-  "tip_language": "Switch Language",
-  "tip_theme": "Switch Theme",
-  "upload_test_data": "Read and Analyze",
-  "please_upload_file": "Please upload a json result file, the file name is like dnspy_result_2024-11-07-17-32-13.json",
-  "tip_upload_test_data": "Upload the test result file of dnspy, and analyze it on the website"
+  "tip": {
+    "github": "Project Repository",
+    "language": "Switch Language",
+    "theme": "Switch Theme",
+    "upload": "Upload the test result file of dnspy, and analyze it on the website",
+    "please_upload_file": "Please upload a json result file, the file name is like dnspy_result_2024-11-07-17-32-13.json",
+    "clear": "Clear current data",
+    "search_region": "Search region",
+    "region_filter": "Region Filter",
+    "copied": "Server IP copied to clipboard",
+    "data_loaded": "Data loaded",
+    "data_loaded_desc": "Click on a specific item to copy the server address",
+    "data_load_failed": "Data load failed",
+    "data_load_failed_desc": "Please check if the file format is correct"
+  },
+  "button": {
+    "upload": "Read and Analyze",
+    "clear": "Clear Data",
+    "select_all": "Select All",
+    "clear_all": "Clear"
+  },
+  "score": {
+    "scores": "Total Score",
+    "latencies": "Average Latency",
+    "successRates": "Success Rate",
+    "qps": "QPS"
+  }
 }

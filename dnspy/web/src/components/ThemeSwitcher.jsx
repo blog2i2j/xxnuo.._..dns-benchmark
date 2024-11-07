@@ -30,7 +30,7 @@ export default function ThemeSwitcher() {
   };
 
   return (
-    <Tooltip content={t("tip_theme")}>
+    <Tooltip content={t("tip.theme")}>
       <Switch
         defaultSelected={isSelected}
         size="lg"
@@ -38,7 +38,7 @@ export default function ThemeSwitcher() {
         onChange={toggleTheme}
         startContent={<SunIcon />}
         endContent={<MoonIcon />}
-        aria-label={t("tip_theme")}
+        aria-label={t("tip.theme")}
       />
     </Tooltip>
   );

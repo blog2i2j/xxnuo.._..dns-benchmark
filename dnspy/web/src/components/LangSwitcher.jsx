@@ -18,12 +18,12 @@ export default function LangSwitcher() {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="ghost" aria-label={t("tip_language")}>
+        <Button variant="ghost" aria-label={t("tip.language")}>
           <LanguageIcon />
           <span className="ml-2">{displayName}</span>
         </Button>
       </DropdownTrigger>
-      <DropdownMenu aria-label={t("tip_language")}>
+      <DropdownMenu aria-label={t("tip.language")}>
         {Object.keys(resources).map((lang) => (
           <DropdownItem key={lang} onClick={() => toggleLanguage(lang)}>
             {resources[lang as keyof typeof resources].name}

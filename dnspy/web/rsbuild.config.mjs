@@ -7,3 +7,4 @@ export default defineConfig({
     title: 'DNSPY Dashboard',
   },
 });
+
