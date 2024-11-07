@@ -1,0 +1,8 @@
+{
+  "title": "DNSPY 数据可视化面板",
+  "tip_github": "项目地址",
+  "tip_language": "切换语言",
+  "tip_theme": "切换主题",
+  "upload_test_data": "读取分析",
+  "tip_upload_test_data": "上传 dnspy 的测试结果文件，在网站上进行分析"
+}
