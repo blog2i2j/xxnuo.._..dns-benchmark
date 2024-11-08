@@ -20,6 +20,7 @@ import { Bar } from "react-chartjs-2";
 import { Toaster, toast } from "sonner";
 
 import { FaSearch as SearchIcon } from "react-icons/fa";
+import { IoIosArrowUp as ArrowUpIcon } from "react-icons/io";
 
 import { useFile } from "../contexts/FileContext";
 
@@ -110,7 +111,9 @@ export default function Analyze() {
     if (selectedRegions.size === 0 || Object.keys(filteredData).length === 0) return emptyChartData;
 
     const filterNonZero = (labels, values) => {
-      const filtered = labels.map((label, i) => ({ label, value: values[i] })).filter((item) => item.value > 0);
+      const filtered = labels.map((label, i) => ({ label, value: values[i] }))
+        .filter((item) => item.value > 0)
+        .sort((a, b) => b.value - a.value);
       return {
         labels: filtered.map((item) => item.label),
         values: filtered.map((item) => item.value),
@@ -123,8 +126,18 @@ export default function Analyze() {
     const successRates = labels.map((server) => filteredData[server].score.successRate);
     const qpsValues = labels.map((server) => filteredData[server].queriesPerSecond);
 
+    const filterLatency = (labels, values) => {
+      const filtered = labels.map((label, i) => ({ label, value: values[i] }))
+        .filter((item) => item.value > 0)
+        .sort((a, b) => a.value - b.value);
+      return {
+        labels: filtered.map((item) => item.label),
+        values: filtered.map((item) => item.value),
+      };
+    };
+
     const scoreData = filterNonZero(labels, scores);
-    const latencyData = filterNonZero(labels, latencies);
+    const latencyData = filterLatency(labels, latencies);
     const successRateData = filterNonZero(labels, successRates);
     const qpsData = filterNonZero(labels, qpsValues);
 
@@ -207,14 +220,6 @@ export default function Analyze() {
         });
       }
     },
-    layout: {
-      padding: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
-      },
-    },
     scales: {
       x: {
         beginAtZero: true,
@@ -222,7 +227,11 @@ export default function Analyze() {
       },
       y: {
         beginAtZero: true,
-        barThickness: 20,
+        barThickness: (context) => {
+          const dataLength = context.chart.data.labels.length;
+          const calculatedHeight = Math.min(40, Math.max(20, 600 / dataLength));
+          return calculatedHeight;
+        }
       },
     },
   };
@@ -266,6 +275,19 @@ export default function Analyze() {
     setSelectedRegions(newSelected);
   };
 
+  // 添加动态高度计算
+  const chartHeight = useMemo(() => {
+    if (!chartData?.[selectedChart]?.labels?.length) return 200; // 默认最小高度
+    const dataLength = chartData[selectedChart].labels.length;
+    // 每个柱状图项目高度 30px + 上下 padding 40px + 顶部标题和图例 60px
+    return dataLength * 20 + 100;
+  }, [chartData, selectedChart]);
+
+  // 修改按钮样式，添加 fixed 定位
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (!file && !jsonData) {
     return (
       <div id="analyze" className="p-4 flex justify-center">
@@ -279,15 +301,15 @@ export default function Analyze() {
   }
 
   return (
-    <div id="analyze" className="p-4 flex flex-col gap-4 h-full">
+    <div id="analyze" className="p-4 flex flex-col gap-4">
       <Toaster position="top-center" expand={false} richColors />
-      <div className="flex flex-col md:flex-row gap-4 h-full">
-        <Card className="w-full md:max-w-[200px] h-full">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Card className="w-full md:w-[180px] shrink-0">
           <CardHeader className="font-medium text-lg px-2 py-2">
             <SearchIcon className="w-4 h-4 m-2" />
             {t("tip.region_filter")}
           </CardHeader>
-          <CardBody className="px-2 py-2 h-full flex flex-col">
+          <CardBody className="px-2 py-2 h-full flex flex-col relative">
 
             <div className="text-sm text-default-500 mb-2">快速筛选</div>
             <div className="flex flex-wrap gap-1 mb-2">
@@ -329,7 +351,7 @@ export default function Analyze() {
             </div>
             <Divider className="my-2 mb-4" />
 
-            <ScrollShadow className="flex-1">
+            <ScrollShadow id="region-scroll-container" className="flex-1">
               <div className="flex flex-wrap gap-1">
                 {filteredRegions.map((region) => (
                   <Chip
@@ -344,11 +366,18 @@ export default function Analyze() {
                 ))}
               </div>
             </ScrollShadow>
+
+            <button
+              onClick={handleScrollToTop}
+              className="fixed bottom-4 right-4 p-2 bg-default-100 rounded-full hover:bg-default-200 transition-colors z-10 shadow-lg"
+              aria-label="回到顶部"
+            >
+              <ArrowUpIcon className="w-5 h-5" />
+            </button>
           </CardBody>
         </Card>
 
-
-        <div className="flex-1 flex flex-col h-full">
+        <div className="flex-1 flex flex-col min-w-0">
           <Tabs selectedKey={selectedChart} onSelectionChange={(key) => setSelectedChart(String(key))} className="mb-4">
             <Tab key="scores" title={t("score.scores")} />
             <Tab key="latencies" title={t("score.latencies")} />
@@ -357,14 +386,29 @@ export default function Analyze() {
           </Tabs>
 
           {selectedRegions.size > 0 ? (
-            <Card className="flex-1 h-full">
-              <CardHeader>{t(`score.${selectedChart}`)}</CardHeader>
-              <CardBody className="h-full">
-                <Bar options={options} data={chartData?.[selectedChart] || emptyChartData} />
+            <Card className="flex-1">
+              <CardHeader className="py-2">{t(`score.${selectedChart}`)}</CardHeader>
+              {/* 使用动态计算的高度 */}
+              <CardBody style={{ height: `${chartHeight}px` }}>
+                <Bar
+                  options={{
+                    ...options,
+                    maintainAspectRatio: false,
+                    layout: {
+                      padding: {
+                        left: 20,
+                        right: 30,
+                        top: 20,
+                        bottom: 20,
+                      }
+                    },
+                  }}
+                  data={chartData?.[selectedChart] || emptyChartData}
+                />
               </CardBody>
             </Card>
           ) : (
-            <div className="flex-1 flex justify-center items-center h-full">
+            <div className="flex justify-center items-center p-8">
               <p>{t("tip.no_region_selected")}</p>
             </div>
           )}
