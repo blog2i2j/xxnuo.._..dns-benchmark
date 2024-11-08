@@ -253,20 +253,12 @@ export default function Analyze() {
             {t("tip.region_filter")}
           </CardHeader>
           <CardBody className="px-2 py-2 h-full flex flex-col">
-            <div className="flex gap-1 mb-3">
-              <button onClick={handleSelectAll} className="flex-1 px-1.5 py-1 text-sm bg-primary text-white rounded-lg">
-                {t("button.select_all")}
-              </button>
-              <button onClick={handleClearAll} className="flex-1 px-1.5 py-1 text-sm bg-default-100 text-default-700 rounded-lg">
-                {t("button.clear_all")}
-              </button>
-            </div>
-            <Divider className="my-2 mb-4" />
+
             <div className="text-sm text-default-500 mb-2">快速筛选</div>
             <div className="flex flex-wrap gap-1 mb-2">
               <Chip
                 variant="flat"
-                color="default" 
+                color="default"
                 className="cursor-pointer"
                 onClick={() => {
                   const regions = availableRegions.filter(r => r.includes("CN"));
@@ -278,7 +270,7 @@ export default function Analyze() {
               <Chip
                 variant="flat"
                 color="default"
-                className="cursor-pointer" 
+                className="cursor-pointer"
                 onClick={() => {
                   const regions = availableRegions.filter(r => r.includes("US"));
                   setSelectedRegions(new Set(regions));
@@ -311,6 +303,7 @@ export default function Analyze() {
             </div>
             <Divider className="my-2 mb-4" />
             <div className="text-sm text-default-500 mb-2">手动选择</div>
+
             <Input
               placeholder={t("tip.search_region")}
               value={searchQuery}
@@ -318,6 +311,15 @@ export default function Analyze() {
               startContent={<SearchIcon className="w-4 h-4" />}
               className="w-full mb-4"
             />
+            <div className="flex gap-1 mb-3">
+              <button onClick={handleSelectAll} className="flex-1 px-1.5 py-1 text-sm bg-primary text-white rounded-lg">
+                {t("button.select_all")}
+              </button>
+              <button onClick={handleClearAll} className="flex-1 px-1.5 py-1 text-sm bg-default-100 text-default-700 rounded-lg">
+                {t("button.clear_all")}
+              </button>
+            </div>
+            <Divider className="my-2 mb-4" />
 
             <ScrollShadow className="flex-1">
               <div className="flex flex-wrap gap-1">
@@ -336,6 +338,7 @@ export default function Analyze() {
             </ScrollShadow>
           </CardBody>
         </Card>
+
 
         <div className="flex-1 flex flex-col h-full">
           <Tabs selectedKey={selectedChart} onSelectionChange={(key) => setSelectedChart(String(key))} className="mb-4">
