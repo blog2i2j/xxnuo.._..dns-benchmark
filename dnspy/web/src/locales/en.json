@@ -11,17 +11,18 @@
     "region_filter": "Region Filter",
     "no_region_selected": "No region selected",
     "copied": "Server IP copied to clipboard",
+    "copy_failed": "Copy failed",
     "data_loaded": "Data loaded",
     "data_loaded_desc": "Click on a specific item to copy the server address",
     "data_load_failed": "Data load failed",
     "data_load_failed_desc": "Please check if the file format is correct",
     "invalid_file_type": "File type error",
     "only_json_allowed": "Only json files are allowed",
-    "showing_limited_data": "Currently showing the first {{count}} items",
+    "showing_limited_data": "{{count}} items",
     "total_items": "Total {{total}} items",
-    "items_per_page": "Items per page",
-    "items_unit": "items/page",
-    "items_all": "Show all"
+    "back_to_top": "Back to Top",
+    "quick_filter": "Quick Filter",
+    "manual_select": "Manual Select"
   },
   "button": {
     "upload": "Read and Analyze",
@@ -31,8 +32,19 @@
   },
   "score": {
     "scores": "Total Score",
+    "desc_scores": "Total score high, the better the overall performance",
     "latencies": "Average Latency",
+    "desc_latencies": "Average latency(ms) low, the faster the query result returns",
     "successRates": "Success Rate",
-    "qps": "QPS"
+    "desc_successRates": "Success rate(%) high, the higher the success rate",
+    "qps": "QPS",
+    "desc_qps": "QPS(Queries Per Second) high, the faster the query speed"
+  },
+  "region": {
+    "asia": "Asia Pacific",
+    "americas": "Americas",
+    "europe": "Europe",
+    "china": "China",
+    "global": "Global"
   }
 }

@@ -16,7 +16,7 @@ import {
   Divider,
   Pagination,
 } from "@nextui-org/react";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LogarithmicScale } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { Toaster, toast } from "sonner";
 
@@ -26,20 +26,20 @@ import { IoIosArrowUp as ArrowUpIcon } from "react-icons/io";
 import { useFile } from "../contexts/FileContext";
 
 // 注册 ChartJS 组件
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, LogarithmicScale, BarElement, Title, Tooltip, Legend);
 
 // 添加区域常量配置
 const REGION_GROUPS = {
   ASIA: {
-    name: "亚太",
+    name: "asia", // 修复: 移除t()函数调用,因为这里是常量定义
     regions: ["CN", "HK", "TW", "JP", "KR", "SG", "ID", "MY", "TH", "VN", "IN", "AU", "NZ", "BD", "AE"],
   },
   AMERICAS: {
-    name: "美洲",
+    name: "americas", // 修复: 移除t()函数调用,因为这里是常量定义
     regions: ["US", "CA", "BR", "MX", "AR", "CL"],
   },
   EUROPE: {
-    name: "欧洲",
+    name: "europe", // 修复: 移除t()函数调用,因为这里是常量定义
     regions: [
       "EU", "DE", "FR", "GB", "IT", "ES", "NL", "SE", "CH", "PL", "RU",
       "CZ", "CY", "RO", "NO", "FI", "SI", "IE", "LV", "HU", "TR", "MD",
@@ -47,11 +47,11 @@ const REGION_GROUPS = {
     ],
   },
   CHINA: {
-    name: "中国",
+    name: "china", // 修复: 移除t()函数调用,因为这里是常量定义
     regions: ["CN", "HK", "TW", "MO"],
   },
   GLOBAL: {
-    name: "全球",
+    name: "global", // 修复: 移除t()函数调用,因为这里是常量定义
     regions: ["CDN", "CLOUDFLARE", "GOOGLE", "AKAMAI", "FASTLY"],
   }
 };
@@ -81,29 +81,40 @@ export default function Analyze() {
   const [selectedChart, setSelectedChart] = useState("scores");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 200;
+  const itemsPerPage = 150;
 
+  // 修复: 添加错误处理
   useEffect(() => {
-    if (jsonData && Object.keys(jsonData).length > 0) {
+    if (!jsonData) return;
+
+    try {
       const regions = new Set();
       Object.values(jsonData).forEach((server) => {
-        if (server.geocode && server.geocode.trim() !== "") {
+        if (server?.geocode?.trim()) {
           regions.add(server.geocode);
         }
       });
       setSelectedRegions(regions);
+    } catch (error) {
+      console.error("Error processing jsonData:", error);
+      toast.error("数据处理出错");
     }
   }, [jsonData]);
 
   const availableRegions = useMemo(() => {
     if (!jsonData) return [];
-    const regions = new Set();
-    Object.values(jsonData).forEach((server) => {
-      if (server.geocode && server.geocode.trim() !== "" && server.score.total > 0) {
-        regions.add(server.geocode);
-      }
-    });
-    return Array.from(regions);
+    try {
+      const regions = new Set();
+      Object.values(jsonData).forEach((server) => {
+        if (server?.geocode?.trim() && server?.score?.total > 0) {
+          regions.add(server.geocode);
+        }
+      });
+      return Array.from(regions);
+    } catch (error) {
+      console.error("Error getting available regions:", error);
+      return [];
+    }
   }, [jsonData]);
 
   // 2. 使用防抖处理选中的区域
@@ -111,12 +122,17 @@ export default function Analyze() {
 
   const filteredData = useMemo(() => {
     if (!jsonData) return {};
-    return Object.fromEntries(
-      Object.entries(jsonData)
-        .filter(([_, data]) =>
-          debouncedSelectedRegions.has(data.geocode) && data.score.total > 0
-        )
-    );
+    try {
+      return Object.fromEntries(
+        Object.entries(jsonData)
+          .filter(([_, data]) =>
+            data?.geocode && debouncedSelectedRegions.has(data.geocode) && data?.score?.total > 0
+          )
+      );
+    } catch (error) {
+      console.error("Error filtering data:", error);
+      return {};
+    }
   }, [jsonData, debouncedSelectedRegions]);
 
   const emptyChartData = {
@@ -133,100 +149,109 @@ export default function Analyze() {
   const chartData = useMemo(() => {
     if (selectedRegions.size === 0 || Object.keys(filteredData).length === 0) return emptyChartData;
 
-    const filterNonZero = (labels, values) => {
-      const filtered = labels.map((label, i) => ({ label, value: values[i] }))
-        .filter((item) => item.value > 0)
-        .sort((a, b) => b.value - a.value);
-      
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginatedData = filtered.slice(startIndex, endIndex);
-      
-      return {
-        labels: paginatedData.map((item) => item.label),
-        values: paginatedData.map((item) => item.value),
+    try {
+      const filterNonZero = (labels, values) => {
+        const filtered = labels.map((label, i) => ({ label, value: values[i] }))
+          .filter((item) => item.value > 0)
+          .sort((a, b) => b.value - a.value);
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedData = filtered.slice(startIndex, endIndex);
+
+        return {
+          labels: paginatedData.map((item) => item.label),
+          values: paginatedData.map((item) => item.value),
+        };
       };
-    };
 
-    const labels = Object.keys(filteredData);
-    const scores = labels.map((server) => filteredData[server].score.total);
-    const latencies = labels.map((server) => filteredData[server].latencyStats.meanMs);
-    const successRates = labels.map((server) => filteredData[server].score.successRate);
-    const qpsValues = labels.map((server) => filteredData[server].queriesPerSecond);
+      const labels = Object.keys(filteredData);
+      const scores = labels.map((server) => filteredData[server]?.score?.total ?? 0);
+      const latencies = labels.map((server) => filteredData[server]?.latencyStats?.meanMs ?? 0);
+      const successRates = labels.map((server) => filteredData[server]?.score?.successRate ?? 0);
+      const qpsValues = labels.map((server) => filteredData[server]?.queriesPerSecond ?? 0);
 
-    const filterLatency = (labels, values) => {
-      const filtered = labels.map((label, i) => ({ label, value: values[i] }))
-        .filter((item) => item.value > 0)
-        .sort((a, b) => a.value - b.value);
-      return {
-        labels: filtered.map((item) => item.label),
-        values: filtered.map((item) => item.value),
+      const filterLatency = (labels, values) => {
+        const filtered = labels.map((label, i) => ({ label, value: values[i] }))
+          .filter((item) => item.value > 0)
+          .sort((a, b) => a.value - b.value);
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedData = filtered.slice(startIndex, endIndex);
+
+        return {
+          labels: paginatedData.map((item) => item.label),
+          values: paginatedData.map((item) => item.value),
+        };
       };
-    };
 
-    const scoreData = filterNonZero(labels, scores);
-    const latencyData = filterLatency(labels, latencies);
-    const successRateData = filterNonZero(labels, successRates);
-    const qpsData = filterNonZero(labels, qpsValues);
+      const scoreData = filterNonZero(labels, scores);
+      const latencyData = filterLatency(labels, latencies);
+      const successRateData = filterNonZero(labels, successRates);
+      const qpsData = filterNonZero(labels, qpsValues);
 
-    const getRandomColor = () => {
-      const hue = Math.random() * 360;
-      return `hsla(${hue}, 70%, 65%, 0.6)`;
-    };
+      const getRandomColor = () => {
+        const hue = Math.random() * 360;
+        return `hsla(${hue}, 70%, 65%, 0.6)`;
+      };
 
-    return {
-      scores: {
-        labels: scoreData.labels,
-        datasets: [
-          {
-            label: "总分",
-            data: scoreData.values,
-            backgroundColor: getRandomColor(),
-          },
-        ],
-      },
-      latencies: {
-        labels: latencyData.labels,
-        datasets: [
-          {
-            label: "平均延迟 (ms)",
-            data: latencyData.values,
-            backgroundColor: getRandomColor(),
-          },
-        ],
-      },
-      successRates: {
-        labels: successRateData.labels,
-        datasets: [
-          {
-            label: "成功率 (%)",
-            data: successRateData.values,
-            backgroundColor: getRandomColor(),
-          },
-        ],
-      },
-      qps: {
-        labels: qpsData.labels,
-        datasets: [
-          {
-            label: "QPS",
-            data: qpsData.values,
-            backgroundColor: getRandomColor(),
-          },
-        ],
-      },
-    };
+      return {
+        scores: {
+          labels: scoreData.labels,
+          datasets: [
+            {
+              label: t("score.scores"),
+              data: scoreData.values,
+              backgroundColor: getRandomColor(),
+            },
+          ],
+        },
+        latencies: {
+          labels: latencyData.labels,
+          datasets: [
+            {
+              label: t("score.latencies"),
+              data: latencyData.values,
+              backgroundColor: getRandomColor(),
+            },
+          ],
+        },
+        successRates: {
+          labels: successRateData.labels,
+          datasets: [
+            {
+              label: t("score.successRates"),
+              data: successRateData.values,
+              backgroundColor: getRandomColor(),
+            },
+          ],
+        },
+        qps: {
+          labels: qpsData.labels,
+          datasets: [
+            {
+              label: t("score.qps"),
+              data: qpsData.values,
+              backgroundColor: getRandomColor(),
+            },
+          ],
+        },
+      };
+    } catch (error) {
+      console.error("Error generating chart data:", error);
+      return emptyChartData;
+    }
   }, [filteredData, selectedRegions, currentPage]);
 
   // 3. 优化图表配置
   const options = useMemo(() => ({
     plugins: {
       legend: {
-        position: "top",
+        display: false, // 隐藏图例
       },
       tooltip: {
         enabled: true,
-        // 限制更新频率
         animation: {
           duration: 0
         },
@@ -253,17 +278,41 @@ export default function Analyze() {
             description: server,
             duration: 2000,
           });
+        }).catch(error => {
+          console.error("Failed to copy:", error);
+          toast.error(t("tip.copy_failed"));
         });
       }
     },
     scales: {
       x: {
         beginAtZero: true,
-        max: 100,
-        // 减少刻度数量
-        ticks: {
-          maxTicksLimit: 10
-        }
+        // 根据不同图表类型设置不同的刻度配置
+        ...(selectedChart === 'latencies' ? {
+          type: 'logarithmic',
+          min: 1,
+          ticks: {
+            maxTicksLimit: 10,
+            callback: function (value) {
+              return value + 'ms';
+            }
+          }
+        } : selectedChart === 'qps' ? {
+          type: 'logarithmic',
+          min: 1,
+          ticks: {
+            maxTicksLimit: 10,
+            callback: function (value) {
+              return value.toLocaleString();
+            }
+          }
+        } : {
+          type: 'linear',
+          max: 100,
+          ticks: {
+            maxTicksLimit: 10
+          }
+        })
       },
       y: {
         beginAtZero: true,
@@ -274,7 +323,7 @@ export default function Analyze() {
         }
       },
     },
-  }), []); // 配置不依赖任何状态，只需计算一次
+  }), [selectedChart, t]); // 添加 selectedChart 和 t 作为依赖项
 
   const filteredRegions = useMemo(
     () => availableRegions.filter((region) => region.toLowerCase().includes(searchQuery.toLowerCase())),
@@ -320,7 +369,7 @@ export default function Analyze() {
     if (!chartData?.[selectedChart]?.labels?.length) return 200; // 默认最小高度
     const dataLength = chartData[selectedChart].labels.length;
     // 每个柱状图项目高度 30px + 上下 padding 40px + 顶部标题和图例 60px
-    return dataLength * 20 + 100;
+    return Math.max(200, dataLength * 20 + 100); // 修复: 添加最小高度限制
   }, [chartData, selectedChart]);
 
   // 修改按钮样式，添加 fixed 定位
@@ -342,7 +391,7 @@ export default function Analyze() {
   const totalPages = useMemo(() => {
     if (!chartData?.[selectedChart]?.labels) return 1;
     const totalItems = Object.keys(filteredData).length;
-    return Math.ceil(totalItems / itemsPerPage);
+    return Math.max(1, Math.ceil(totalItems / itemsPerPage)); // 修复: 确保至少有1页
   }, [filteredData, chartData, selectedChart]);
 
   if (!file && !jsonData) {
@@ -368,7 +417,7 @@ export default function Analyze() {
           </CardHeader>
           <CardBody className="px-2 py-2 h-full flex flex-col relative">
 
-            <div className="text-sm text-default-500 mb-2">快速筛选</div>
+            <div className="text-sm text-default-500 mb-2">{t("tip.quick_filter")}</div>
             <div className="flex flex-wrap gap-1 mb-2">
               {Object.entries(REGION_GROUPS).map(([key, group]) => (
                 <Chip
@@ -384,12 +433,12 @@ export default function Analyze() {
                     setSelectedRegions(new Set(regions));
                   }}
                 >
-                  {group.name}
+                  {t(`region.${key.toLowerCase()}`)} {/* 修复: 使用翻译key */}
                 </Chip>
               ))}
             </div>
             <Divider className="my-2 mb-4" />
-            <div className="text-sm text-default-500 mb-2">手动选择</div>
+            <div className="text-sm text-default-500 mb-2">{t("tip.manual_select")}</div>
 
             <Input
               placeholder={t("tip.search_region")}
@@ -428,7 +477,7 @@ export default function Analyze() {
               onClick={handleScrollToTop}
               className={`fixed bottom-4 right-4 p-2 bg-default-100 rounded-full hover:bg-default-200 transition-all z-10 shadow-lg ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
-              aria-label="回到顶部"
+              aria-label={t("tip.back_to_top")}
             >
               <ArrowUpIcon className="w-5 h-5" />
             </button>
@@ -436,7 +485,18 @@ export default function Analyze() {
         </Card>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <Tabs selectedKey={selectedChart} onSelectionChange={(key) => setSelectedChart(String(key))} className="mb-4">
+          <Tabs
+            selectedKey={selectedChart}
+            onSelectionChange={(key) => {
+              setSelectedChart(String(key));
+              setCurrentPage(1); // 修复: 切换图表时重置页码
+              // 使用 setTimeout 来确保在状态更新后失去焦点
+              setTimeout(() => {
+                document.activeElement?.blur();
+              }, 0);
+            }}
+            className="mb-2"
+          >
             <Tab key="scores" title={t("score.scores")} />
             <Tab key="latencies" title={t("score.latencies")} />
             <Tab key="successRates" title={t("score.successRates")} />
@@ -445,16 +505,41 @@ export default function Analyze() {
 
           {selectedRegions.size > 0 ? (
             <Card className="flex-1">
-              <CardHeader className="py-2 flex justify-between items-center">
-                <div>{t(`score.${selectedChart}`)}</div>
-                {totalPages > 1 && (
-                  <Pagination
-                    total={totalPages}
-                    page={currentPage}
-                    onChange={setCurrentPage}
-                    size="sm"
-                  />
-                )}
+              <CardHeader className="py-4">
+                <div className="w-full flex justify-between items-center ml-4">
+                  <div className="flex items-center  gap-4">
+                    <div className="text-2xl font-bold">{t(`score.${selectedChart}`)}</div>
+                    <div className="text-sm text-default-500 italic">
+                      {t(`score.desc_${selectedChart}`)}
+                    </div>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-sm text-default-500">
+                        <span className="px-3 py-1.5 bg-default-100 rounded-lg font-medium">
+                          {t("tip.showing_limited_data", { count: itemsPerPage })}
+                        </span>
+                        <span className="text-default-400">·</span>
+                        <span className="px-3 py-1.5 bg-default-100 rounded-lg font-medium">
+                          {t("tip.total_items", { total: Object.keys(filteredData).length })}
+                        </span>
+                      </div>
+                      <Pagination
+                        total={totalPages}
+                        page={currentPage}
+                        onChange={setCurrentPage}
+                        size="sm"
+                        showControls
+                        variant="bordered"
+                        classNames={{
+                          wrapper: "gap-1.5",
+                          item: "w-8 h-8 bg-default-50 hover:bg-default-100",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardBody style={{ height: `${chartHeight}px` }}>
                 <Bar
