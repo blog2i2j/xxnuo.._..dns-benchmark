@@ -1,21 +1,21 @@
 # 默认目标
-all: clean build
+all: run
 
 # 构建目标
 build: 
 	@echo "正在构建..."
 	go mod tidy
-	go build -ldflags "-s -w" -tags release .
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -tags release -o dnspy-darwin-amd64 .
+	GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -tags release -o dnspy-darwin-arm64 .
+	GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -tags release -o dnspy-linux-amd64 .
+	GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -tags release -o dnspy-linux-arm64 .
+	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -tags release -o dnspy-windows-amd64.exe .
+	GOOS=windows GOARCH=arm64 go build -ldflags "-s -w" -tags release -o dnspy-windows-arm64.exe .
 
 # 运行目标
 run:
 	@echo "正在运行..."
 	go run .
-
-# 清理目标
-clean:
-	@echo "正在清理..."
-	rm -f ./dnspy
 
 # 更新地理数据
 update-geodata:

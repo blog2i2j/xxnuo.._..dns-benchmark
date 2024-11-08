@@ -212,6 +212,15 @@ func main() {
 	}).Info("\x1b[32m测试结果已输出到文件\x1b[0m")
 
 	// 是否打开网页分析数据
+	log.Info("是否使用默认浏览器打开可视化数据分析网站[Y/n]")
+	var input string
+	fmt.Scanln(&input)
+	if input == "Y" || input == "y" || input == "" {
+		err := open.Run("https://bench.dash.2020818.xyz")
+		if err != nil {
+			log.WithError(err).Error("无法打开可视化数据分析网站")
+		}
+	}
 }
 
 func OutputHTML(path string, resultString string) {

@@ -5,8 +5,9 @@
     "language": "Switch Language",
     "theme": "Switch Theme",
     "upload": "Upload the test result file of dnspy, and analyze it on the website",
-    "please_upload_file": "Please upload a json result file, the file name is like dnspy_result_2024-11-07-17-32-13.json",
+    "please_upload_file": "Please upload a json result file, the file name is like dnspy_result_2024-11-07-17-32-13.json. Or click the sample button to use sample data",
     "clear": "Clear current data",
+    "sample": "Use Sample Data",
     "search_region": "Search region",
     "filters": "Filter",
     "no_region_selected": "No region selected",
@@ -29,7 +30,8 @@
     "upload": "Read and Analyze",
     "clear": "Clear Data",
     "select_all": "Select All",
-    "clear_all": "Clear"
+    "clear_all": "Clear",
+    "sample": "Sample"
   },
   "score": {
     "scores": "Total Score",

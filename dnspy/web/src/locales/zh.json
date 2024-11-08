@@ -6,7 +6,8 @@
     "theme": "切换主题",
     "upload": "上传 dnspy 的测试结果文件，在网站上进行分析",
     "clear": "清除当前数据",
-    "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json",
+    "sample": "使用示例数据",
+    "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json。或点击示例按钮使用示例数据",
     "search_region": "搜索地区",
     "filters": "筛选",
     "no_region_selected": "未选择地区",
@@ -29,7 +30,8 @@
     "upload": "读取分析",
     "clear": "清除数据",
     "select_all": "全选",
-    "clear_all": "清除"
+    "clear_all": "清除",
+    "sample": "示例"
   },
   "score": {
     "scores": "总分",

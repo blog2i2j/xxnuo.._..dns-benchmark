@@ -1,51 +1,34 @@
-我测了全世界...的 DNS 服务器
+# dnspy - 测试全世界的 DNS 服务器
 
-# 测试全世界的 DNS 服务器能否访问及性能 - 超级多
+### 数据分析面板预览
 
-如题，测试全世界的 DNS 服务器能否访问及性能，一共有 `989` 个 DNS 服务器地址，列表在 `providers.txt` 文件中（包括同一个服务的 UDP、DoH、DoT 地址）。测了 3 个小时，终于测完了。
-中部电信，Wi-Fi6E 环境，macOS 14.5，每个服务器测 10 秒。
-话不多说，直接上结果。
+![数据分析面板预览](./images/preview.png)
 
-## 测试结果
+[数据分析面板，内含示例数据](https://bench.dash.2020818.xyz)
 
-> 可点击柱状图的每个柱子复制对应 DNS 服务器地址
->
-> 标题下按钮可切换数据源，有
->
-> - `加密 DNS 服务器（DoH、DoT、QUIC）`（默认展示类型）
-> - `所有 DNS 服务器数据（加密 DNS 服务器 + IPv4、IPv6 非加密服务器）`
+## 测试工具
 
-[数据页面](https://xxnuo.github.io/dns-benchmark/results.html)
+在本仓库的 [releases](https://github.com/xxnuo/dns-benchmark/releases) 页面中按你的系统架构下载 `dnspy-*` 文件，比如我的 PC 是 Intel 处理器的 macOS，所以下载 `dnspy-darwin-amd64` 文件。
 
-[数据页面(国内镜像)](https://dns-benchmark.gh.2020818.xyz/results.html)
+然后**必须关闭所有代理软件的 Tun 模式、虚拟网卡模式，否则会影响测试结果。**
 
-## 测试结果预览图
+重命名文件为 `dnspy`（Windows 是 `dnspy.exe`），然后打开终端，进入到你这个文件所在的目录。执行命令开始测试
 
-![测试结果预览](./images/preview.jpeg)
+```bash
+unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY
+./dnspy
+```
 
-具体项目去数据页面看吧！
+按提示输入启动测试
 
-## 自测工具 dnspy
-
-> 工具目前还未完成，还在开发中。
-
-在 Github 仓库 [dns-benchmark/releases](https://github.com/xxnuo/dns-benchmark/releases) 中，
-按你的系统架构下载 `dnspy-*` 文件，比如我的 PC 是 Intel 处理器的 macOS，所以下载 `dnspy-darwin-amd64` 文件。
-重命名文件为 `dnspy`（Windows 是 `dnspy.exe`），然后打开终端，进入到你这个文件所在的目录。
-
-多线程模式默认开启，以加快测试速度。
-
-但是默认参数 10 个线程需要至少上下行 1 MB/s 网络和至少 4 核心处理器。
+默认使用多线程模式，以加快测试速度。但是默认参数 10 个线程需要至少上下行 1 MB/s 网络和至少 4 核心处理器。
 如果网络或处理器不好，会导致测试结果不准确，必须通过`-w` 参数降低线程数。
 
-必须关闭所有代理软件的 Tun 模式、虚拟网卡模式，否则会影响测试结果。
+测试完成后会输出到当前目录下形如 `dnspy_result_2024-11-07-17-32-13.json` 的 JSON 文件中。
 
-TODO:编写说明
+按程序提示输入 `Y` 或 `y` 或直接回车，会自动打开数据分析面板网站，点击网站右上角的 `读取分析` 按钮，选择你刚才的 JSON 文件，就可以看到可视化测试结果了。
 
-得到 `results.html` 文件，会自动用浏览器打开。
-Done!
-
-## 如果你想自己编译 dnspy 使用旧版输出试试
+## 编译测试工具
 
 编译所需环境：
 
@@ -61,8 +44,5 @@ cd dns-benchmark/dnspy
 # 更新所需数据（需要科学上网）
 make update
 make
-./dnspy --old-html
+./dnspy
 ```
-按提示可以生成旧版输出 HTML 结果。
-
-目前正在编写新版数据展示页面，完成后会发布。
