@@ -8,7 +8,7 @@
     "clear": "清除当前数据",
     "please_upload_file": "请点击右上角读取分析一个 json 结果文件，文件名形如 dnspy_result_2024-11-07-17-32-13.json",
     "search_region": "搜索地区",
-    "region_filter": "地区筛选",
+    "filters": "筛选",
     "no_region_selected": "未选择地区",
     "copied": "服务器已复制到剪贴板",
     "copy_failed": "复制失败",
@@ -21,8 +21,9 @@
     "showing_limited_data": "{{count}} 条",
     "total_items": "共 {{total}} 条",
     "back_to_top": "回到顶部",
-    "quick_filter": "快速筛选",
-    "manual_select": "手动选择"
+    "quick_filter": "快速筛选地区",
+    "manual_select": "手动选择地区",
+    "server_type": "服务器类型"
   },
   "button": {
     "upload": "读取分析",
@@ -45,6 +46,6 @@
     "americas": "美洲",
     "europe": "欧洲",
     "china": "中国",
-    "global": "全球"
+    "global": "CDN"
   }
 }

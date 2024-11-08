@@ -22,6 +22,7 @@ export function FileProvider({ children }) {
             description: t("tip.data_loaded_desc"),
             duration: 2000,
             className: "dark:text-neutral-200",
+            dismissible: true,
           });
         }, 0);
         hasShownInitialToast.current = true;
@@ -38,6 +39,7 @@ export function FileProvider({ children }) {
       description: t(desc),
       duration: type === 'error' ? 3000 : 2000,
       className: "dark:text-neutral-200",
+      dismissible: true,
     });
   }, [t]);
 

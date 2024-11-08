@@ -8,7 +8,7 @@
     "please_upload_file": "Please upload a json result file, the file name is like dnspy_result_2024-11-07-17-32-13.json",
     "clear": "Clear current data",
     "search_region": "Search region",
-    "region_filter": "Region Filter",
+    "filters": "Filter",
     "no_region_selected": "No region selected",
     "copied": "Server IP copied to clipboard",
     "copy_failed": "Copy failed",
@@ -22,7 +22,8 @@
     "total_items": "Total {{total}} items",
     "back_to_top": "Back to Top",
     "quick_filter": "Quick Filter",
-    "manual_select": "Manual Select"
+    "manual_select": "Manual Select",
+    "server_type": "Server Type"
   },
   "button": {
     "upload": "Read and Analyze",
@@ -45,6 +46,6 @@
     "americas": "Americas",
     "europe": "Europe",
     "china": "China",
-    "global": "Global"
+    "global": "CDN"
   }
 }

@@ -21,7 +21,7 @@ import { Bar } from "react-chartjs-2";
 import { Toaster, toast } from "sonner";
 
 import { FaSearch as SearchIcon } from "react-icons/fa";
-import { IoIosArrowUp as ArrowUpIcon } from "react-icons/io";
+import { IoIosArrowUp as ArrowUpIcon, IoIosArrowDown as CollapseIcon } from "react-icons/io";
 
 import { useFile } from "../contexts/FileContext";
 
@@ -56,6 +56,15 @@ const REGION_GROUPS = {
   }
 };
 
+// 添加服务器类型常量
+const SERVER_TYPES = {
+  ALL: "all",
+  UDP: "udp",
+  DoH: "doh",
+  DoT: "dot",
+  DoQ: "doq"
+};
+
 // 1. 添加防抖函数
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -82,6 +91,10 @@ export default function Analyze() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 150;
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
+
+  // 添加服务器类型状态
+  const [serverType, setServerType] = useState(SERVER_TYPES.ALL);
 
   // 修复: 添加错误处理
   useEffect(() => {
@@ -120,20 +133,37 @@ export default function Analyze() {
   // 2. 使用防抖处理选中的区域
   const debouncedSelectedRegions = useDebounce(selectedRegions, 300);
 
+  // 修改 filteredData 的计算逻辑
   const filteredData = useMemo(() => {
     if (!jsonData) return {};
     try {
       return Object.fromEntries(
         Object.entries(jsonData)
-          .filter(([_, data]) =>
-            data?.geocode && debouncedSelectedRegions.has(data.geocode) && data?.score?.total > 0
-          )
+          .filter(([key, data]) => {
+            const matchesRegion = data?.geocode && debouncedSelectedRegions.has(data.geocode) && data?.score?.total > 0;
+            if (!matchesRegion) return false;
+            if (serverType === SERVER_TYPES.ALL) return true;
+
+            const url = (key || "").toLowerCase();
+
+            // 判断服务器类型
+            switch (serverType) {
+              case SERVER_TYPES.DoH:
+                return url.startsWith("https://") || url.includes("/dns-query");
+              case SERVER_TYPES.DoT:
+                return url.startsWith("tls://") || url.endsWith(":853");
+              case SERVER_TYPES.DoQ:
+                return url.startsWith("quic://");
+              case SERVER_TYPES.UDP:
+                return !url.startsWith("https://") && !url.includes("/dns-query") && !url.startsWith("tls://") && !url.endsWith(":853") && !url.startsWith("quic://");
+            }
+          })
       );
     } catch (error) {
       console.error("Error filtering data:", error);
       return {};
     }
-  }, [jsonData, debouncedSelectedRegions]);
+  }, [jsonData, debouncedSelectedRegions, serverType]);
 
   const emptyChartData = {
     labels: [],
@@ -368,7 +398,7 @@ export default function Analyze() {
   const chartHeight = useMemo(() => {
     if (!chartData?.[selectedChart]?.labels?.length) return 200; // 默认最小高度
     const dataLength = chartData[selectedChart].labels.length;
-    // 每个柱状图项目高度 30px + 上下 padding 40px + 顶部标题和图例 60px
+    // 每个柱图项目高度 30px + 上下 padding 40px + 顶部标题和图例 60px
     return Math.max(200, dataLength * 20 + 100); // 修复: 添加最小高度限制
   }, [chartData, selectedChart]);
 
@@ -387,7 +417,7 @@ export default function Analyze() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 计算总页数
+  // 计��总页数
   const totalPages = useMemo(() => {
     if (!chartData?.[selectedChart]?.labels) return 1;
     const totalItems = Object.keys(filteredData).length;
@@ -410,12 +440,39 @@ export default function Analyze() {
     <div id="analyze" className="p-4 flex flex-col gap-4">
       <Toaster position="top-center" expand={false} richColors />
       <div className="flex flex-col md:flex-row gap-4">
-        <Card className="w-full md:w-[180px] shrink-0">
-          <CardHeader className="font-medium text-lg px-2 py-2">
-            <SearchIcon className="w-4 h-4 m-2" />
-            {t("tip.region_filter")}
+        <Card className={`w-full md:w-[180px] shrink-0 transition-all duration-300 h-fit ${isFilterCollapsed ? 'h-[52px] overflow-hidden' : ''
+          }`}>
+          <CardHeader
+            className="font-medium text-lg px-2 py-2 cursor-pointer hover:bg-default-100"
+            onClick={() => setIsFilterCollapsed(!isFilterCollapsed)}
+          >
+            <div className="flex items-center gap-2">
+              <SearchIcon className="w-4 h-4 m-2" />
+              {t("tip.filters")}
+            </div>
+            <CollapseIcon
+              className={`w-4 h-4 ml-auto transition-transform ${isFilterCollapsed ? 'rotate-0' : 'rotate-180'
+                }`}
+            />
           </CardHeader>
-          <CardBody className="px-2 py-2 h-full flex flex-col relative">
+          <CardBody
+            className={`px-2 py-2 flex flex-col relative transition-all duration-300 ${isFilterCollapsed ? 'max-h-0 p-0 overflow-hidden opacity-0' : 'max-h-[2000px]'
+              }`}
+          >
+            <div className="text-sm text-default-500 mb-2">{t("tip.server_type")}</div>
+            <div className="flex flex-wrap gap-1 mb-4">
+              {Object.values(SERVER_TYPES).map((type) => (
+                <Chip
+                  key={type}
+                  variant={serverType === type ? "solid" : "flat"}
+                  color={serverType === type ? "primary" : "default"}
+                  className="cursor-pointer"
+                  onClick={() => setServerType(type)}
+                >
+                  {type.toUpperCase()}
+                </Chip>
+              ))}
+            </div>
 
             <div className="text-sm text-default-500 mb-2">{t("tip.quick_filter")}</div>
             <div className="flex flex-wrap gap-1 mb-2">
