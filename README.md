@@ -1,5 +1,7 @@
 # dnspy - 测试全世界的 DNS 服务器
 
+[English](./README.en.md) | [中文](./README.md)
+
 ### 数据分析面板预览
 
 ![数据分析面板预览](./images/preview.png)
