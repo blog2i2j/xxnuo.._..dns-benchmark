@@ -14,6 +14,7 @@ import {
   Tabs,
   Tab,
   Divider,
+  Pagination,
 } from "@nextui-org/react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -79,6 +80,8 @@ export default function Analyze() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChart, setSelectedChart] = useState("scores");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 200;
 
   useEffect(() => {
     if (jsonData && Object.keys(jsonData).length > 0) {
@@ -134,9 +137,14 @@ export default function Analyze() {
       const filtered = labels.map((label, i) => ({ label, value: values[i] }))
         .filter((item) => item.value > 0)
         .sort((a, b) => b.value - a.value);
+      
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedData = filtered.slice(startIndex, endIndex);
+      
       return {
-        labels: filtered.map((item) => item.label),
-        values: filtered.map((item) => item.value),
+        labels: paginatedData.map((item) => item.label),
+        values: paginatedData.map((item) => item.value),
       };
     };
 
@@ -208,7 +216,7 @@ export default function Analyze() {
         ],
       },
     };
-  }, [filteredData, selectedRegions]);
+  }, [filteredData, selectedRegions, currentPage]);
 
   // 3. 优化图表配置
   const options = useMemo(() => ({
@@ -330,6 +338,13 @@ export default function Analyze() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // 计算总页数
+  const totalPages = useMemo(() => {
+    if (!chartData?.[selectedChart]?.labels) return 1;
+    const totalItems = Object.keys(filteredData).length;
+    return Math.ceil(totalItems / itemsPerPage);
+  }, [filteredData, chartData, selectedChart]);
+
   if (!file && !jsonData) {
     return (
       <div id="analyze" className="p-4 flex justify-center">
@@ -430,8 +445,17 @@ export default function Analyze() {
 
           {selectedRegions.size > 0 ? (
             <Card className="flex-1">
-              <CardHeader className="py-2">{t(`score.${selectedChart}`)}</CardHeader>
-              {/* 使用动态计算的高度 */}
+              <CardHeader className="py-2 flex justify-between items-center">
+                <div>{t(`score.${selectedChart}`)}</div>
+                {totalPages > 1 && (
+                  <Pagination
+                    total={totalPages}
+                    page={currentPage}
+                    onChange={setCurrentPage}
+                    size="sm"
+                  />
+                )}
+              </CardHeader>
               <CardBody style={{ height: `${chartHeight}px` }}>
                 <Bar
                   options={{
