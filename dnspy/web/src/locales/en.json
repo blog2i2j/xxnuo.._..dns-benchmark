@@ -9,11 +9,19 @@
     "clear": "Clear current data",
     "search_region": "Search region",
     "region_filter": "Region Filter",
+    "no_region_selected": "No region selected",
     "copied": "Server IP copied to clipboard",
     "data_loaded": "Data loaded",
     "data_loaded_desc": "Click on a specific item to copy the server address",
     "data_load_failed": "Data load failed",
-    "data_load_failed_desc": "Please check if the file format is correct"
+    "data_load_failed_desc": "Please check if the file format is correct",
+    "invalid_file_type": "File type error",
+    "only_json_allowed": "Only json files are allowed",
+    "showing_limited_data": "Currently showing the first {{count}} items",
+    "total_items": "Total {{total}} items",
+    "items_per_page": "Items per page",
+    "items_unit": "items/page",
+    "items_all": "Show all"
   },
   "button": {
     "upload": "Read and Analyze",

@@ -6,7 +6,7 @@ export default function Upload() {
   const { t } = useTranslation();
   const { setFile, jsonData, setJsonData } = useFile();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
       setFile(file);
