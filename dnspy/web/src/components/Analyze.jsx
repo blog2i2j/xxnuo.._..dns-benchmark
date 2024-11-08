@@ -55,12 +55,30 @@ const REGION_GROUPS = {
   }
 };
 
+// 1. 添加防抖函数
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 export default function Analyze() {
   const { t } = useTranslation();
   const { file, jsonData } = useFile();
   const [selectedRegions, setSelectedRegions] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChart, setSelectedChart] = useState("scores");
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     if (jsonData && Object.keys(jsonData).length > 0) {
@@ -85,16 +103,18 @@ export default function Analyze() {
     return Array.from(regions);
   }, [jsonData]);
 
+  // 2. 使用防抖处理选中的区域
+  const debouncedSelectedRegions = useDebounce(selectedRegions, 300);
+
   const filteredData = useMemo(() => {
     if (!jsonData) return {};
-    const filtered = {};
-    Object.entries(jsonData).forEach(([server, data]) => {
-      if (selectedRegions.has(data.geocode) && data.score.total > 0) {
-        filtered[server] = data;
-      }
-    });
-    return filtered;
-  }, [jsonData, selectedRegions]);
+    return Object.fromEntries(
+      Object.entries(jsonData)
+        .filter(([_, data]) =>
+          debouncedSelectedRegions.has(data.geocode) && data.score.total > 0
+        )
+    );
+  }, [jsonData, debouncedSelectedRegions]);
 
   const emptyChartData = {
     labels: [],
@@ -190,17 +210,22 @@ export default function Analyze() {
     };
   }, [filteredData, selectedRegions]);
 
-  const options = {
+  // 3. 优化图表配置
+  const options = useMemo(() => ({
     plugins: {
       legend: {
         position: "top",
       },
       tooltip: {
+        enabled: true,
+        // 限制更新频率
+        animation: {
+          duration: 0
+        },
         callbacks: {
           label: function (context) {
             const value = context.raw;
             const label = context.dataset.label;
-            const server = context.label;
             return `${label}: ${value}`;
           },
         },
@@ -208,6 +233,9 @@ export default function Analyze() {
     },
     responsive: true,
     indexAxis: "y",
+    animation: {
+      duration: 0 // 禁用动画以提高性能
+    },
     onClick: (event, elements, chart) => {
       if (elements.length > 0) {
         const index = elements[0].index;
@@ -224,17 +252,21 @@ export default function Analyze() {
       x: {
         beginAtZero: true,
         max: 100,
+        // 减少刻度数量
+        ticks: {
+          maxTicksLimit: 10
+        }
       },
       y: {
         beginAtZero: true,
+        // 优化柱状图厚度计算
         barThickness: (context) => {
           const dataLength = context.chart.data.labels.length;
-          const calculatedHeight = Math.min(40, Math.max(20, 600 / dataLength));
-          return calculatedHeight;
+          return Math.min(30, Math.max(15, 400 / dataLength));
         }
       },
     },
-  };
+  }), []); // 配置不依赖任何状态，只需计算一次
 
   const filteredRegions = useMemo(
     () => availableRegions.filter((region) => region.toLowerCase().includes(searchQuery.toLowerCase())),
@@ -287,6 +319,16 @@ export default function Analyze() {
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // 当页面滚动超过 300px 时显示按钮
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!file && !jsonData) {
     return (
@@ -369,7 +411,8 @@ export default function Analyze() {
 
             <button
               onClick={handleScrollToTop}
-              className="fixed bottom-4 right-4 p-2 bg-default-100 rounded-full hover:bg-default-200 transition-colors z-10 shadow-lg"
+              className={`fixed bottom-4 right-4 p-2 bg-default-100 rounded-full hover:bg-default-200 transition-all z-10 shadow-lg ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
               aria-label="回到顶部"
             >
               <ArrowUpIcon className="w-5 h-5" />
