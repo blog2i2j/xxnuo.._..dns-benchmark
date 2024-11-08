@@ -4,8 +4,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  Select,
-  SelectItem,
   Input,
   Listbox,
   ListboxSection,
@@ -15,6 +13,7 @@ import {
   SelectSection,
   Tabs,
   Tab,
+  Divider,
 } from "@nextui-org/react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -248,38 +247,93 @@ export default function Analyze() {
     <div id="analyze" className="p-4 flex flex-col gap-4 h-full">
       <Toaster position="top-center" expand={false} richColors />
       <div className="flex flex-col md:flex-row gap-4 h-full">
-        <Card className="md:w-1/4">
+        <Card className="w-full md:max-w-[200px] h-full">
           <CardHeader className="font-medium text-lg px-2 py-2">
             <SearchIcon className="w-4 h-4 m-2" />
             {t("tip.region_filter")}
           </CardHeader>
-          <CardBody className="px-2 py-2">
-            <Select
-              multiple
-              placeholder={t("tip.search_region")}
-              selectedKeys={Array.from(selectedRegions)}
-              onSelectionChange={(keys) => {
-                setSelectedRegions(new Set(Array.from(keys).map(String)));
-              }}
-              className="w-full"
-            >
-              {filteredRegions.map((region) => (
-                <SelectItem key={region} value={region}>
-                  {region}
-                </SelectItem>
-              ))}
-            </Select>
-            <div className="flex gap-1 mt-2">
+          <CardBody className="px-2 py-2 h-full flex flex-col">
+            <div className="flex gap-1 mb-3">
               <button onClick={handleSelectAll} className="flex-1 px-1.5 py-1 text-sm bg-primary text-white rounded-lg">
                 {t("button.select_all")}
               </button>
-              <button
-                onClick={handleClearAll}
-                className="flex-1 px-1.5 py-1 text-sm bg-default-100 text-default-700 rounded-lg"
-              >
+              <button onClick={handleClearAll} className="flex-1 px-1.5 py-1 text-sm bg-default-100 text-default-700 rounded-lg">
                 {t("button.clear_all")}
               </button>
             </div>
+            <Divider className="my-2 mb-4" />
+            <div className="text-sm text-default-500 mb-2">快速筛选</div>
+            <div className="flex flex-wrap gap-1 mb-2">
+              <Chip
+                variant="flat"
+                color="default" 
+                className="cursor-pointer"
+                onClick={() => {
+                  const regions = availableRegions.filter(r => r.includes("CN"));
+                  setSelectedRegions(new Set(regions));
+                }}
+              >
+                中国节点
+              </Chip>
+              <Chip
+                variant="flat"
+                color="default"
+                className="cursor-pointer" 
+                onClick={() => {
+                  const regions = availableRegions.filter(r => r.includes("US"));
+                  setSelectedRegions(new Set(regions));
+                }}
+              >
+                美国节点
+              </Chip>
+              <Chip
+                variant="flat"
+                color="default"
+                className="cursor-pointer"
+                onClick={() => {
+                  const regions = availableRegions.filter(r => r.includes("JP") || r.includes("KR") || r.includes("SG"));
+                  setSelectedRegions(new Set(regions));
+                }}
+              >
+                亚太节点
+              </Chip>
+              <Chip
+                variant="flat"
+                color="default"
+                className="cursor-pointer"
+                onClick={() => {
+                  const regions = availableRegions.filter(r => r.includes("EU"));
+                  setSelectedRegions(new Set(regions));
+                }}
+              >
+                欧洲节点
+              </Chip>
+            </div>
+            <Divider className="my-2 mb-4" />
+            <div className="text-sm text-default-500 mb-2">手动选择</div>
+            <Input
+              placeholder={t("tip.search_region")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              startContent={<SearchIcon className="w-4 h-4" />}
+              className="w-full mb-4"
+            />
+
+            <ScrollShadow className="flex-1">
+              <div className="flex flex-wrap gap-1">
+                {filteredRegions.map((region) => (
+                  <Chip
+                    key={region}
+                    variant={selectedRegions.has(region) ? "solid" : "flat"}
+                    color={selectedRegions.has(region) ? "primary" : "default"}
+                    className="cursor-pointer"
+                    onClick={() => handleRegionToggle(region, !selectedRegions.has(region))}
+                  >
+                    {region}
+                  </Chip>
+                ))}
+              </div>
+            </ScrollShadow>
           </CardBody>
         </Card>
 
