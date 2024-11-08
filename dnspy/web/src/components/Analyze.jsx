@@ -26,28 +26,58 @@ import { useFile } from "../contexts/FileContext";
 // 注册 ChartJS 组件
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+// 添加区域常量配置
+const REGION_GROUPS = {
+  ASIA: {
+    name: "亚太",
+    regions: ["CN", "HK", "TW", "JP", "KR", "SG", "ID", "MY", "TH", "VN", "IN", "AU", "NZ", "BD", "AE"],
+  },
+  AMERICAS: {
+    name: "美洲",
+    regions: ["US", "CA", "BR", "MX", "AR", "CL"],
+  },
+  EUROPE: {
+    name: "欧洲",
+    regions: [
+      "EU", "DE", "FR", "GB", "IT", "ES", "NL", "SE", "CH", "PL", "RU",
+      "CZ", "CY", "RO", "NO", "FI", "SI", "IE", "LV", "HU", "TR", "MD",
+      "LU", "BG", "EE", "AT", "IL"
+    ],
+  },
+  CHINA: {
+    name: "中国",
+    regions: ["CN", "HK", "TW", "MO"],
+  },
+  GLOBAL: {
+    name: "全球",
+    regions: ["CDN", "CLOUDFLARE", "GOOGLE", "AKAMAI", "FASTLY"],
+  }
+};
+
 export default function Analyze() {
   const { t } = useTranslation();
   const { file, jsonData } = useFile();
-  const [selectedRegions, setSelectedRegions] = useState(() => {
-    const savedRegions = localStorage.getItem("selectedRegions");
-    return savedRegions ? new Set(JSON.parse(savedRegions)) : new Set();
-  });
+  const [selectedRegions, setSelectedRegions] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChart, setSelectedChart] = useState("scores");
 
   useEffect(() => {
-    if (jsonData && selectedRegions.size === 0 && Object.keys(jsonData).length > 0) {
-      const firstRegion = jsonData[Object.keys(jsonData)[0]].geocode;
-      setSelectedRegions(new Set([firstRegion]));
+    if (jsonData && Object.keys(jsonData).length > 0) {
+      const regions = new Set();
+      Object.values(jsonData).forEach((server) => {
+        if (server.geocode && server.geocode.trim() !== "") {
+          regions.add(server.geocode);
+        }
+      });
+      setSelectedRegions(regions);
     }
-  }, [jsonData, selectedRegions.size]);
+  }, [jsonData]);
 
   const availableRegions = useMemo(() => {
     if (!jsonData) return [];
     const regions = new Set();
     Object.values(jsonData).forEach((server) => {
-      if (server.geocode && server.geocode.trim() !== "") {
+      if (server.geocode && server.geocode.trim() !== "" && server.score.total > 0) {
         regions.add(server.geocode);
       }
     });
@@ -98,6 +128,11 @@ export default function Analyze() {
     const successRateData = filterNonZero(labels, successRates);
     const qpsData = filterNonZero(labels, qpsValues);
 
+    const getRandomColor = () => {
+      const hue = Math.random() * 360;
+      return `hsla(${hue}, 70%, 65%, 0.6)`;
+    };
+
     return {
       scores: {
         labels: scoreData.labels,
@@ -105,7 +140,7 @@ export default function Analyze() {
           {
             label: "总分",
             data: scoreData.values,
-            backgroundColor: "rgba(53, 162, 235, 0.5)",
+            backgroundColor: getRandomColor(),
           },
         ],
       },
@@ -115,7 +150,7 @@ export default function Analyze() {
           {
             label: "平均延迟 (ms)",
             data: latencyData.values,
-            backgroundColor: "rgba(255, 99, 132, 0.5)",
+            backgroundColor: getRandomColor(),
           },
         ],
       },
@@ -125,7 +160,7 @@ export default function Analyze() {
           {
             label: "成功率 (%)",
             data: successRateData.values,
-            backgroundColor: "rgba(75, 192, 192, 0.5)",
+            backgroundColor: getRandomColor(),
           },
         ],
       },
@@ -135,7 +170,7 @@ export default function Analyze() {
           {
             label: "QPS",
             data: qpsData.values,
-            backgroundColor: "rgba(153, 102, 255, 0.5)",
+            backgroundColor: getRandomColor(),
           },
         ],
       },
@@ -256,50 +291,23 @@ export default function Analyze() {
 
             <div className="text-sm text-default-500 mb-2">快速筛选</div>
             <div className="flex flex-wrap gap-1 mb-2">
-              <Chip
-                variant="flat"
-                color="default"
-                className="cursor-pointer"
-                onClick={() => {
-                  const regions = availableRegions.filter(r => r.includes("CN"));
-                  setSelectedRegions(new Set(regions));
-                }}
-              >
-                中国节点
-              </Chip>
-              <Chip
-                variant="flat"
-                color="default"
-                className="cursor-pointer"
-                onClick={() => {
-                  const regions = availableRegions.filter(r => r.includes("US"));
-                  setSelectedRegions(new Set(regions));
-                }}
-              >
-                美国节点
-              </Chip>
-              <Chip
-                variant="flat"
-                color="default"
-                className="cursor-pointer"
-                onClick={() => {
-                  const regions = availableRegions.filter(r => r.includes("JP") || r.includes("KR") || r.includes("SG"));
-                  setSelectedRegions(new Set(regions));
-                }}
-              >
-                亚太节点
-              </Chip>
-              <Chip
-                variant="flat"
-                color="default"
-                className="cursor-pointer"
-                onClick={() => {
-                  const regions = availableRegions.filter(r => r.includes("EU"));
-                  setSelectedRegions(new Set(regions));
-                }}
-              >
-                欧洲节点
-              </Chip>
+              {Object.entries(REGION_GROUPS).map(([key, group]) => (
+                <Chip
+                  key={key}
+                  variant="flat"
+                  color="default"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    const regions = availableRegions.filter(r =>
+                      group.regions.some(code => r.toUpperCase().includes(code)) ||
+                      REGION_GROUPS.GLOBAL.regions.some(code => r.toUpperCase().includes(code))
+                    );
+                    setSelectedRegions(new Set(regions));
+                  }}
+                >
+                  {group.name}
+                </Chip>
+              ))}
             </div>
             <Divider className="my-2 mb-4" />
             <div className="text-sm text-default-500 mb-2">手动选择</div>
