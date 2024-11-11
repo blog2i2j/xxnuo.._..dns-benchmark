@@ -23,6 +23,7 @@ export function FileProvider({ children }) {
             duration: 2000,
             className: "dark:text-neutral-200",
             dismissible: true,
+            position: "center",
           });
         }, 0);
         hasShownInitialToast.current = true;
@@ -40,6 +41,7 @@ export function FileProvider({ children }) {
       duration: type === 'error' ? 3000 : 2000,
       className: "dark:text-neutral-200",
       dismissible: true,
+      position: "center",
     });
   }, [t]);
 
