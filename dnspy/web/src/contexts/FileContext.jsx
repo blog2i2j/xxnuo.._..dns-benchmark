@@ -20,10 +20,9 @@ export function FileProvider({ children }) {
         setTimeout(() => {
           toast.success(t("tip.data_loaded"), {
             description: t("tip.data_loaded_desc"),
-            duration: 2000,
+            duration: 5000,
             className: "dark:text-neutral-200",
             dismissible: true,
-            position: "center",
           });
         }, 0);
         hasShownInitialToast.current = true;
@@ -38,10 +37,9 @@ export function FileProvider({ children }) {
   const showToast = useCallback((type, title, desc) => {
     toast[type](t(title), {
       description: t(desc),
-      duration: type === 'error' ? 3000 : 2000,
+      duration: type === 'error' ? 6000 : 5000,
       className: "dark:text-neutral-200",
       dismissible: true,
-      position: "center",
     });
   }, [t]);
 
