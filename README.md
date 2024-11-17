@@ -20,7 +20,7 @@
 
 ## 测试工具
 
-在本仓库的 [releases](https://github.com/xxnuo/dns-benchmark/releases) 页面中按你的系统架构下载 `dnspy-*` 文件，比如我的 PC 是 Intel 处理器的 macOS，所以下载 `dnspy-darwin-amd64` 文件。
+在本仓库的 [releases](https://github.com/xxnuo/dns-benchmark/releases) 页面中按你的系统架构下载 `dnspy-*` 文件，比如我的是 M系列处理器的 macOS，所以下载 `dnspy-darwin-arm64` 文件。
 
 然后**必须关闭所有代理软件的 Tun 模式、虚拟网卡模式，否则会影响测试结果。**
 
