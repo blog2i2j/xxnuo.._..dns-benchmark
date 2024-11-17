@@ -1,4 +1,4 @@
-# dnspy - 用于本地测试全世界的 DNS 服务器的可访问性和可靠性的测试工具
+# dnspy - 用于本地测试全世界的 DNS 服务器的可访问性和性能的测试工具
 
 [English](./README.en.md) | [中文](./README.md)
 
