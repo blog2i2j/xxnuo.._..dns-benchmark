@@ -14,11 +14,13 @@
 
 ### 数据分析面板预览
 
-![数据分析面板预览](./images/preview.png)
+![数据分析面板预览](https://github.com/user-attachments/assets/c743f7ba-4d77-4d16-8515-02c0dc99ddfa)
 
 [数据分析面板，内含示例数据](https://bench.dash.2020818.xyz)
 
 ## 测试工具
+
+![dnspy](https://github.com/user-attachments/assets/a499d2fc-ffcd-4b71-a0dd-d6e5839792dd)
 
 在本仓库的 [releases](https://github.com/xxnuo/dns-benchmark/releases) 页面中按你的系统架构下载 `dnspy-*` 文件，比如我的是 M系列处理器的 macOS，所以下载 `dnspy-darwin-arm64` 文件。
 
